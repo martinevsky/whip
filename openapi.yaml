@@ -1,0 +1,73 @@
+openapi: 3.0.3
+info:
+  title: Whip API
+  version: "1.0.0"
+  description: |
+    Minimal service that accepts REST API calls to push a `whip` command to a
+    WebSocket client. Authentication uses a simple opaque Bearer token that the
+    WebSocket client generates and passes during the WebSocket upgrade.
+
+    WebSocket handshake (out of scope for OpenAPI, documented here for clarity):
+      - Connect to `ws(s)://{host}/ws`
+      - Provide the token during upgrade via either:
+          • Authorization header: `Authorization: Bearer <secret>` (recommended), or
+          • Sec-WebSocket-Protocol: `<secret>` (token as subprotocol)
+      - The server associates the connection with `<secret>` while connected.
+      - REST callers then use `Authorization: Bearer <secret>` to target that client.
+
+    WebSocket messages sent by the server:
+      - `{ "command": "whip", "duration": <int seconds 1..60>, "ts": "ISO-8601" }`
+
+servers:
+  - url: https://YOUR-CLOUD-RUN-URL
+    description: Cloud Run base URL (replace with your deployed URL)
+
+paths:
+  /whip:
+    post:
+      summary: Send a whip command to the associated WebSocket client
+      description: |
+        Pushes a `whip` command with the given duration (in seconds) to the WebSocket
+        connection that registered using the same Bearer token. Duration must be between
+        1 and 60 seconds inclusive.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [duration]
+              properties:
+                duration:
+                  type: integer
+                  minimum: 1
+                  maximum: 60
+                  example: 5
+      responses:
+        "202":
+          description: Command accepted and forwarded to the WebSocket client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: sent
+                  payload:
+                    type: object
+        "401":
+          description: Missing/invalid bearer token
+        "404":
+          description: No active WebSocket client for this token
+        "422":
+          description: Validation error (e.g., duration out of range)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
