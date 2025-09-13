@@ -51,7 +51,7 @@ async def run(ws_url: str, token: Optional[str], use_subprotocol: bool):
 
 def main():
     parser = argparse.ArgumentParser(description="WebSocket client for Whip API")
-    parser.add_argument("--ws-url", default="ws://localhost:8080/ws", help="WebSocket URL")
+    parser.add_argument("--ws-url", default="ws://whip.martinevsky.ru:60606/ws", help="WebSocket URL")
     parser.add_argument("--token", default=None, help="Optional pre-chosen token (Bearer secret)")
     parser.add_argument("--use-subprotocol", action="store_true", help="Send token in Sec-WebSocket-Protocol instead of Authorization header")
     args = parser.parse_args()

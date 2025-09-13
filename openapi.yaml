@@ -19,7 +19,7 @@ info:
       - `{ "command": "whip", "duration": <int seconds 1..60>, "ts": "ISO-8601" }`
 
 servers:
-  - url: https://YOUR-CLOUD-RUN-URL
+  - url: http://whip.martinevsky.ru:60606
     description: Cloud Run base URL (replace with your deployed URL)
 
 paths:
