@@ -14,7 +14,7 @@ info:
       - REST callers then use `Authorization: Bearer <secret>` to target that client.
 
     WebSocket messages sent by the server:
-      - `{ "command": "whip", "duration": <int seconds 1..60>, "ts": "ISO-8601" }`
+      - `{ "command": "whip", "duration": <int seconds 1..60>, "side": "left|right|both", "ts": "ISO-8601" }`
 
 servers:
   - url: http://whip.martinevsky.ru:60606
@@ -43,6 +43,12 @@ paths:
                   minimum: 1
                   maximum: 60
                   example: 5
+                side:
+                  type: string
+                  description: Which side to apply the whip
+                  enum: [left, right, both]
+                  default: both
+                  example: left
       responses:
         "202":
           description: Command accepted and forwarded to the WebSocket client

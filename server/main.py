@@ -7,6 +7,7 @@ from typing import Dict, Optional
 from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from enum import Enum
 
 
 app = FastAPI(
@@ -21,8 +22,18 @@ app = FastAPI(
 )
 
 
+class SideEnum(str, Enum):
+    left = "left"
+    right = "right"
+    both = "both"
+
+
 class WhipRequest(BaseModel):
     duration: int = Field(..., ge=1, le=60, description="Duration in seconds (1..60)")
+    side: SideEnum = Field(
+        default=SideEnum.both,
+        description="Which side to apply the whip: left, right, or both",
+    )
 
 
 active_connections: Dict[str, WebSocket] = {}
@@ -54,6 +65,7 @@ async def whip(payload: WhipRequest, token: str = Depends(get_bearer_token)):
     msg = {
         "command": "whip",
         "duration": payload.duration,
+        "side": payload.side.value,
         "ts": datetime.now(timezone.utc).isoformat(),
     }
 

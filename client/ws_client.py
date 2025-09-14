@@ -26,7 +26,8 @@ async def run(ws_url: str):
             cmd = data.get("command")
             if cmd == "whip":
                 duration = data.get("duration")
-                print(f"Received whip command for {duration} seconds.")
+                side = data.get("side", "both")
+                print(f"Received whip command: {duration}s, side={side}.")
             else:
                 print(f"Received message: {data}")
 
