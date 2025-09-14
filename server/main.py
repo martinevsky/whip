@@ -64,7 +64,8 @@ async def whip(payload: WhipRequest, token: str = Depends(get_bearer_token)):
         async with connections_lock:
             if active_connections.get(token) is ws:
                 active_connections.pop(token, None)
-        raise HTTPException(status_code=410, detail="WebSocket disconnected")
+        # Spec defines 404 for no active WS client; treat failed send as 404
+        raise HTTPException(status_code=404, detail="No active WebSocket client for this token")
 
     return JSONResponse({"status": "sent", "payload": msg}, status_code=202)
 
