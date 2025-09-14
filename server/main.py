@@ -14,8 +14,8 @@ app = FastAPI(
     version="1.0.0",
     description=(
         "Accepts REST API calls to push a `whip` command to a WebSocket client.\n\n"
-        "WebSocket handshake: connect to /ws and include the token either via\n"
-        "Authorization: Bearer <secret> header or as Sec-WebSocket-Protocol (the token as subprotocol).\n"
+        "WebSocket handshake: connect to /ws and include the token via\n"
+        "Authorization: Bearer <secret> header.\n"
         "Use Authorization: Bearer <secret> on REST calls to target that connection."
     ),
 )
@@ -71,34 +71,22 @@ async def whip(payload: WhipRequest, token: str = Depends(get_bearer_token)):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    # Extract token from Authorization header or Sec-WebSocket-Protocol
+    # Extract token only from Authorization header
     token: Optional[str] = None
-    selected_subprotocol: Optional[str] = None
 
-    # 1) Authorization: Bearer <token>
     auth = websocket.headers.get("authorization")
     if auth:
         parts = auth.split()
         if len(parts) == 2 and parts[0].lower() == "bearer":
             token = parts[1]
 
-    # 2) Sec-WebSocket-Protocol: <token>
-    if not token:
-        subp = websocket.headers.get("sec-websocket-protocol")
-        if subp:
-            # Could be comma-separated per RFC; take the first token
-            proto = subp.split(",")[0].strip()
-            if proto:
-                token = proto
-                selected_subprotocol = proto
-
     if not token:
         # Missing credentials
         await websocket.close(code=1008)
         return
 
-    # Accept connection (echo subprotocol if used)
-    await websocket.accept(subprotocol=selected_subprotocol)
+    # Accept connection
+    await websocket.accept()
 
     try:
         # Register connection

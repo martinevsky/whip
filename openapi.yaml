@@ -9,9 +9,7 @@ info:
 
     WebSocket handshake (out of scope for OpenAPI, documented here for clarity):
       - Connect to `ws(s)://{host}/ws`
-      - Provide the token during upgrade via either:
-          • Authorization header: `Authorization: Bearer <secret>` (recommended), or
-          • Sec-WebSocket-Protocol: `<secret>` (token as subprotocol)
+      - Provide the token during upgrade via Authorization header: `Authorization: Bearer <secret>`
       - The server associates the connection with `<secret>` while connected.
       - REST callers then use `Authorization: Bearer <secret>` to target that client.
 
